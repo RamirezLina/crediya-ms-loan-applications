@@ -21,8 +21,8 @@ public class RestClientAuthConfig {
 
     private final int timeout;
 
-    public RestClientAuthConfig(@Value("${adapter.restconsumer.url}") String url,
-                                @Value("${adapter.restconsumer.timeout}") int timeout) {
+    public RestClientAuthConfig(@Value("${adapters.restclient.url}") String url,
+                                @Value("${adapters.restclient.timeout}") int timeout) {
         this.url = url;
         this.timeout = timeout;
     }

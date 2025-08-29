@@ -1,14 +1,10 @@
 server:
-  port: 8080
+  port: 8081
 spring:
   application:
     name: "ms-loan-applications"
   devtools:
     add-properties: false
-  h2:
-    console:
-      enabled: true
-      path: "/h2"
   profiles:
     include: null
 management:
@@ -25,10 +21,17 @@ management:
       enabled: true
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
-adapter:
-  restconsumer:
-    timeout: 5000
-    url: "http://localhost:8080"
+adapters:
+  r2dbc:
+    host: "${R2DBC_HOST}"
+    port: "${R2DBC_PORT}"
+    database: "${R2DBC_DATABASE}"
+    schema: "${R2DBC_SCHEMA}"
+    username: "${R2DBC_USERNAME}"
+    password: "${R2DBC_PASSWORD}"
+  restclient:
+    timeout: "${REST_AUTH_TIMEOUT}"
+    url:  "${REST_AUTH_URL}"
 resilience4j:
   circuitbreaker:
     instances:
