@@ -16,6 +16,7 @@ public class RestClientAuth implements UserRepository {
     public Mono<Boolean> existUserByEmail(String email) {
         return client
                 .get()
+                .uri(uriBuilder -> uriBuilder.path("/email/{email}").build(email))
                 .retrieve()
                 .bodyToMono(Boolean.class);
     }
