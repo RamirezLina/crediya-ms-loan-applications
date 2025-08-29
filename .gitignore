@@ -337,3 +337,4 @@ build-cache
 # Archivos local
 /local/
 .env
+AGENTS.md
