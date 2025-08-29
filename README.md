@@ -1,4 +1,4 @@
-# Proyecto Base Implementando Clean Architecture
+# CrediYa: Microservicio para la gestión de solicitudes
 
 ## Antes de Iniciar
 
