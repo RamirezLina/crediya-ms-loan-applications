@@ -33,10 +33,15 @@ public class LoanApplication {
     }
 
     public Mono<LoanApplication> validateDeadline() {
-        if ( this.deadline.isAfter(LocalDate.now())) {
+        if ( !this.deadline.isAfter(LocalDate.now())) {
             return Mono.error(BusinessException.Type.INVALID_DEADLINE.build());
         }
         return Mono.just(this);
+    }
+
+    public LoanApplication defineApplicationStatus(){
+        this.setStatusId(LoanStatus.PENDING.getStatusId());
+        return this;
     }
     
     

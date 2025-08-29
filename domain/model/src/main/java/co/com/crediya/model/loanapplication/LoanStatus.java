@@ -9,9 +9,9 @@ public enum LoanStatus {
     APPROVED(2),
     REJECTED(3);
     
-    private final int statusId;
+    private final long statusId;
 
-    LoanStatus(int statusId) {
+    LoanStatus(long statusId) {
         this.statusId = statusId;
     }
         
