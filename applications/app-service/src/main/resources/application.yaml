@@ -53,3 +53,23 @@ resilience4j:
         slidingWindowSize: 10
         minimumNumberOfCalls: 10
         waitDurationInOpenState: "10s"
+        
+routes:
+  paths:
+    loanApp: "/api/v1/solicitud"
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    url: /openapi.yaml
+    path: /doc/swagger-ui.html
+  paths-to-match: /api/**
+
+app:
+  openapi:
+    title: "CREDIYA: ms-loan-applications"
+    description: "Api para la gestion de solicitudes de préstamo de la plataforma CrediYa"
+    version: 1.0.0
+    server: http://localhost:8081
