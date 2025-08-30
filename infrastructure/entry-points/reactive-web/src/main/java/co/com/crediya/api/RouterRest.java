@@ -1,6 +1,7 @@
 package co.com.crediya.api;
 
 import co.com.crediya.api.config.LoanApplicationPath;
+import co.com.crediya.api.config.OpenApiControllerDoc;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +13,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 
 @Configuration
 @RequiredArgsConstructor
-public class RouterRest {
+public class RouterRest implements OpenApiControllerDoc {
     
     private final LoanApplicationPath loanApplicationPath;
     private final LoanApplicationHandler handler;
