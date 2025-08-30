@@ -16,21 +16,16 @@ public class RegisterApplicationUseCase {
     private final UserRepository userRepository;
 
 
-    public Mono<LoanApplication> 
-    execute(LoanApplication newApplication) {
+    public Mono<LoanApplication> execute(LoanApplication newApplication) {
         return newApplication.validateAmount()
                 .then(newApplication.validateDeadline())
                 .map(LoanApplication::defineApplicationStatus)
-                .flatMap(validatedApplication ->  loanTypeRepository.findById(validatedApplication.getLoanTypeId()) )
+                .flatMap(validatedApplication -> loanTypeRepository.findById(validatedApplication.getLoanTypeId()))
                 .switchIfEmpty(Mono.error(BusinessException.Type.LOAN_TYPE_NOT_EXISTS.build(newApplication.getLoanTypeId().toString())))
-                .flatMap( loanType -> userRepository.existUserByEmail(newApplication.getEmail()))
+                .flatMap(loanType -> userRepository.existUserByEmail(newApplication.getEmail()))
                 .flatMap(exists -> exists
                         ? applicationRepository.save(newApplication)
                         : Mono.error(BusinessException.Type.USER_NOT_EXISTS.build())
                 );
-
     }
-    
-    
-
 }
