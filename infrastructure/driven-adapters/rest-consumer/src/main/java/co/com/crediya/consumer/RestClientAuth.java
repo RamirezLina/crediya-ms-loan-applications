@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 public class RestClientAuth implements UserRepository {
     private final WebClient client;
     
-    @CircuitBreaker(name = "existUserByEmail" /*, fallbackMethod = "testGetOk"*/)
+    @CircuitBreaker(name = "existUserByEmail", fallbackMethod = "testGetUsers")
     public Mono<Boolean> existUserByEmail(String email) {
         return client
                 .get()
@@ -21,11 +21,11 @@ public class RestClientAuth implements UserRepository {
                 .bodyToMono(Boolean.class);
     }
 
-//    public Mono<String> testGetOk(Exception ignored) {
-//        return client
-//                .get() // TODO: change for another endpoint or destination
-//                .retrieve()
-//                .bodyToMono(String.class);
-//    }
+    public Mono<String> testGetUsers(Exception ignored) {
+        return client
+                .get() 
+                .retrieve()
+                .bodyToMono(String.class);
+    }
     
 }
