@@ -1,7 +1,7 @@
 package co.com.crediya.api;
 
 import co.com.crediya.api.config.LoanApplicationPath;
-import co.com.crediya.api.config.OpenApiControllerDoc;
+import co.com.crediya.api.docs.OpenApiControllerDoc;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
