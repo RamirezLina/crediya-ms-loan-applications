@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -28,12 +29,13 @@ public class LoanApplicationHandler {
 
 
     public Mono<ServerResponse> listenRegisterLoanApplication(ServerRequest serverRequest) {
+        String token = serverRequest.headers().firstHeader(HttpHeaders.AUTHORIZATION);
         return serverRequest.bodyToMono(LoanApplicationDto.class)
                 .switchIfEmpty(Mono.error(new ServerWebInputException("El cuerpo de la solicitud es requerido")))
                 .flatMap(this::validateDto)
                 .doOnNext(dto -> log.info("[REGISTER LOAN APPLICATION] Se inicia el registro de la solicitud de prestamo"))
                 .map(mapper::toModel)
-                .flatMap(registerApplicationUseCase::execute)
+                .flatMap(model -> registerApplicationUseCase.execute(model, token))
                 .map(mapper::toDto)
                 .flatMap(applicationDto -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
