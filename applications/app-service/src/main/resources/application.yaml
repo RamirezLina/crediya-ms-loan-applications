@@ -73,3 +73,8 @@ app:
     description: "Api para la gestion de solicitudes de préstamo de la plataforma CrediYa"
     version: 1.0.0
     server: http://localhost:8081
+
+
+jwt:
+  secret: "${JWT_SECRET}"
+  issuer: "${JWT_ISSUER}"
