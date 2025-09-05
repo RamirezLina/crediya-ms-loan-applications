@@ -1,11 +1,14 @@
 package co.com.crediya.consumer;
 
+import co.com.crediya.model.error.AppException;
 import co.com.crediya.model.user.gateways.UserRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -23,9 +26,27 @@ public class RestClientAuth implements UserRepository {
                 .uri(uriBuilder -> uriBuilder.path("/email/{email}").build(email))
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        this::handleClientError
+                )
+                .onStatus(
+                        HttpStatusCode::is5xxServerError,
+                        this::handleServerError
+                )
                 .bodyToMono(Boolean.class);
     }
 
+    private Mono<Throwable> handleClientError(ClientResponse response) {
+        return response.bodyToMono(String.class)
+                .map(AppException.Type.MS_REQUEST_400_ERROR::build);
+
+    }
+
+    private Mono<Throwable> handleServerError(ClientResponse response) {
+        return response.bodyToMono(String.class)
+                .map(AppException.Type.MS_REQUEST_500_ERROR::build);
+    }
     private Mono<Boolean> fallbackExistUserByEmail(String email, String token) {
         return Mono.just(false);
     }
