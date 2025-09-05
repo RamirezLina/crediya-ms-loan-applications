@@ -32,6 +32,7 @@ public class SecurityConfig {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange((authorize) -> authorize
+                        .pathMatchers( "/doc/**",  "/v3/api-docs/**").permitAll()
                         .pathMatchers(path.getLoanApp() + "/**").hasAnyAuthority("USER")
                         .anyExchange().authenticated()
                 )
@@ -80,4 +81,3 @@ public class SecurityConfig {
         return converter;
     }
 }
-
