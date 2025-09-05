@@ -36,7 +36,11 @@ public interface OpenApiControllerDoc {
                             responses = {@ApiResponse(responseCode = "200", description = "Solicitud de prestamo registrada.",
                                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoanApplicationDto.class))),
                                     @ApiResponse(responseCode = "400", description = "Error de validación",
-                                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorPayload.class)))})
+                                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorPayload.class))),
+                                    @ApiResponse(responseCode = "401", description = "No autenticado",
+                                            content = @Content(mediaType = "application/json")),
+                                    @ApiResponse(responseCode = "403", description = "Acceso prohibido: el usuario no esta autorizado",
+                                            content = @Content(mediaType = "application/json"))})
             )})
     RouterFunction<ServerResponse> routerFunction(LoanApplicationHandler loanApplicationHandler);
 
