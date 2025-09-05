@@ -15,7 +15,7 @@ class BusinessExceptionTest {
     @Test
     void buildWithFormattedMessageReplacesPlaceholder() {
         BusinessException ex = BusinessException.Type.LOAN_TYPE_NOT_EXISTS.build("42");
-        assertEquals("El tipo de prestamo solicitado  (id:42) no exitste", ex.getMessage());
+        assertEquals("El tipo de prestamo solicitado  (id:42) no existe", ex.getMessage());
     }
 
     @Test

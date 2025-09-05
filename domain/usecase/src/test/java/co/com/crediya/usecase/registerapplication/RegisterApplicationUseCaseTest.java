@@ -38,6 +38,7 @@ class RegisterApplicationUseCaseTest {
     private RegisterApplicationUseCase underTest;
     
     private LoanApplication application;
+    private final String token = "dummy-token";
 
 
     @BeforeEach
@@ -54,17 +55,17 @@ class RegisterApplicationUseCaseTest {
     void registerLoanApplication_success(){
         LoanType type = mock(LoanType.class);
         when(loanTypeRepository.findById(any(Long.class))).thenReturn(Mono.just(type));
-        when(userRepository.existUserByEmail(any(String.class))).thenReturn(Mono.just(true));
+        when(userRepository.existUserByEmail(any(String.class), any(String.class))).thenReturn(Mono.just(true));
         when(applicationRepository.save(any(LoanApplication.class))).thenReturn(Mono.just(application));
 
-        StepVerifier.create(underTest.execute(application))
+        StepVerifier.create(underTest.execute(application, token))
                 .expectNext(application)
                 .verifyComplete();
         
         verify(loanTypeRepository, times(1))
                 .findById(application.getLoanTypeId());
         verify(userRepository, times(1))
-                .existUserByEmail(application.getEmail());
+                .existUserByEmail(application.getEmail(), token);
         
       ArgumentCaptor<LoanApplication> captor = ArgumentCaptor.forClass(LoanApplication.class);
       verify(applicationRepository, times(1)).save(captor.capture());
@@ -73,14 +74,14 @@ class RegisterApplicationUseCaseTest {
       assertEquals(application.getAmount(), captured.getAmount());
       assertEquals(application.getDeadline(), captured.getDeadline());
       assertEquals(application.getLoanTypeId(), captured.getLoanTypeId());
-      assertEquals(application.getStatusId(), 1L);
+      assertEquals(1L, captured.getStatusId());
     }
 
     @Test
     void registerLoanApplication_shouldReturnError_whenUserIsInvalid(){
         application.setAmount(-2000);
         
-        StepVerifier.create(underTest.execute(application))
+        StepVerifier.create(underTest.execute(application, token))
                 .expectErrorMatches(ex -> ex instanceof BusinessException &&
                         BusinessValidations.INVALID_AMOUNT_VALUE.equals(ex.getMessage()))
                 .verify();
@@ -94,7 +95,7 @@ class RegisterApplicationUseCaseTest {
     void registerLoanApplication_shouldReturnError_whenDeadlineInvalidToday() {
         application.setDeadline(LocalDate.now());
 
-        StepVerifier.create(underTest.execute(application))
+        StepVerifier.create(underTest.execute(application, token))
                 .expectErrorMatches(ex -> ex instanceof BusinessException &&
                         BusinessValidations.INVALID_DEADLINE_VALUE.equals(ex.getMessage()))
                 .verify();
@@ -108,9 +109,9 @@ class RegisterApplicationUseCaseTest {
     void registerLoanApplication_shouldReturnError_whenLoanTypeNotExists() {
         when(loanTypeRepository.findById(any(Long.class))).thenReturn(Mono.empty());
 
-        StepVerifier.create(underTest.execute(application))
+        StepVerifier.create(underTest.execute(application, token))
                 .expectErrorMatches(ex -> ex instanceof BusinessException &&
-                        ("El tipo de prestamo solicitado  (id:" + application.getLoanTypeId() + ") no exitste").equals(ex.getMessage()))
+                        ("El tipo de prestamo solicitado  (id:" + application.getLoanTypeId() + ") no existe").equals(ex.getMessage()))
                 .verify();
 
         verify(loanTypeRepository, times(1)).findById(application.getLoanTypeId());
@@ -121,15 +122,15 @@ class RegisterApplicationUseCaseTest {
     @Test
     void registerLoanApplication_shouldReturnError_whenUserNotExists() {
         when(loanTypeRepository.findById(any(Long.class))).thenReturn(Mono.just(mock(LoanType.class)));
-        when(userRepository.existUserByEmail(any(String.class))).thenReturn(Mono.just(false));
+        when(userRepository.existUserByEmail(any(String.class), any(String.class))).thenReturn(Mono.just(false));
 
-        StepVerifier.create(underTest.execute(application))
+        StepVerifier.create(underTest.execute(application, token))
                 .expectErrorMatches(ex -> ex instanceof BusinessException &&
                         "El usuario con el email indicado no existe".equals(ex.getMessage()))
                 .verify();
 
         verify(loanTypeRepository, times(1)).findById(application.getLoanTypeId());
-        verify(userRepository, times(1)).existUserByEmail(application.getEmail());
+        verify(userRepository, times(1)).existUserByEmail(application.getEmail(), token);
         verifyNoInteractions(applicationRepository);
     }
 
@@ -137,7 +138,7 @@ class RegisterApplicationUseCaseTest {
     void registerLoanApplication_shouldPropagateError_whenLoanTypeRepositoryFails() {
         when(loanTypeRepository.findById(any(Long.class))).thenReturn(Mono.error(new RuntimeException("loanTypeFail")));
 
-        StepVerifier.create(underTest.execute(application))
+        StepVerifier.create(underTest.execute(application, token))
                 .expectErrorMatches(ex -> ex instanceof RuntimeException &&
                         "loanTypeFail".equals(ex.getMessage()))
                 .verify();
@@ -150,31 +151,31 @@ class RegisterApplicationUseCaseTest {
     @Test
     void registerLoanApplication_shouldPropagateError_whenUserRepositoryFails() {
         when(loanTypeRepository.findById(any(Long.class))).thenReturn(Mono.just(mock(LoanType.class)));
-        when(userRepository.existUserByEmail(any(String.class))).thenReturn(Mono.error(new RuntimeException("userRepoFail")));
+        when(userRepository.existUserByEmail(any(String.class), any(String.class))).thenReturn(Mono.error(new RuntimeException("userRepoFail")));
 
-        StepVerifier.create(underTest.execute(application))
+        StepVerifier.create(underTest.execute(application, token))
                 .expectErrorMatches(ex -> ex instanceof RuntimeException &&
                         "userRepoFail".equals(ex.getMessage()))
                 .verify();
 
         verify(loanTypeRepository, times(1)).findById(application.getLoanTypeId());
-        verify(userRepository, times(1)).existUserByEmail(application.getEmail());
+        verify(userRepository, times(1)).existUserByEmail(application.getEmail(), token);
         verifyNoInteractions(applicationRepository);
     }
 
     @Test
     void registerLoanApplication_shouldPropagateError_whenApplicationRepositoryFails() {
         when(loanTypeRepository.findById(any(Long.class))).thenReturn(Mono.just(mock(LoanType.class)));
-        when(userRepository.existUserByEmail(any(String.class))).thenReturn(Mono.just(true));
+        when(userRepository.existUserByEmail(any(String.class), any(String.class))).thenReturn(Mono.just(true));
         when(applicationRepository.save(any(LoanApplication.class))).thenReturn(Mono.error(new RuntimeException("saveFail")));
 
-        StepVerifier.create(underTest.execute(application))
+        StepVerifier.create(underTest.execute(application, token))
                 .expectErrorMatches(ex -> ex instanceof RuntimeException &&
                         "saveFail".equals(ex.getMessage()))
                 .verify();
 
         verify(loanTypeRepository, times(1)).findById(application.getLoanTypeId());
-        verify(userRepository, times(1)).existUserByEmail(application.getEmail());
+        verify(userRepository, times(1)).existUserByEmail(application.getEmail(), token);
         verify(applicationRepository, times(1)).save(any(LoanApplication.class));
     }
 

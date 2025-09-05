@@ -17,11 +17,6 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
         Throwable error = getError(request);
         errorAttributes.put("path", request.path());
         errorAttributes.put("errorMessage", error.getMessage());
-        errorAttributes.put("exceptionClass", error.getClass().getName());
-        errorAttributes.put("generatedInClass", error.getStackTrace()[0].getFileName());
-        errorAttributes.put("generatedInMethod", error.getStackTrace()[0].getMethodName());
-        errorAttributes.put("generatedInLine", error.getStackTrace()[0].getLineNumber());
-        
         String errorCauseMessage = error.getCause() == null ? "Validacion de negocio no superada" : error.getCause().getMessage();
         errorAttributes.put("InitCause", errorCauseMessage);
         return errorAttributes;

@@ -1,4 +1,4 @@
-package co.com.crediya.api.config;
+package co.com.crediya.api.docs;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;

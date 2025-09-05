@@ -1,5 +1,6 @@
 package co.com.crediya.api.error;
 
+import co.com.crediya.model.error.AuthException;
 import co.com.crediya.model.error.BusinessException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.boot.autoconfigure.web.WebProperties;
@@ -27,7 +28,8 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
             Map.of(
                     BusinessException.class, HttpStatus.BAD_REQUEST,
                     ConstraintViolationException.class, HttpStatus.BAD_REQUEST,
-                    ServerWebInputException.class, HttpStatus.BAD_REQUEST
+                    ServerWebInputException.class, HttpStatus.BAD_REQUEST,
+                    AuthException.class, HttpStatus.FORBIDDEN
             );
 
 
