@@ -7,7 +7,8 @@ public enum LoanStatus {
     
     PENDING(1),
     APPROVED(2),
-    REJECTED(3);
+    REJECTED(3),
+    MANUAL(4);
     
     private final long statusId;
 
