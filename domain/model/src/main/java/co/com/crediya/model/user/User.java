@@ -16,7 +16,6 @@ public class User {
 
     private String name;
     private String lastName;
-    private Long identification;
     private LocalDate birthDate;
     private String address;
     private long phone;

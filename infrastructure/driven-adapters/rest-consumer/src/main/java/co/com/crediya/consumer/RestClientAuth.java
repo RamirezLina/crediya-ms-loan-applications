@@ -1,6 +1,7 @@
 package co.com.crediya.consumer;
 
 import co.com.crediya.model.error.AppException;
+import co.com.crediya.model.user.User;
 import co.com.crediya.model.user.gateways.UserRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,24 @@ public class RestClientAuth implements UserRepository {
                         this::handleServerError
                 )
                 .bodyToMono(Boolean.class);
+    }
+
+    public  Mono<User> getUserByEmail(String email, String token) {
+        log.info("[GET PAGEABLE LOAN APPLICATIONS]  Obteniendo la informacion del usuario en ms-auth");
+        return client
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/detail/{email}").build(email))
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        this::handleClientError
+                )
+                .onStatus(
+                        HttpStatusCode::is5xxServerError,
+                        this::handleServerError
+                )
+                .bodyToMono(User.class);
     }
 
     private Mono<Throwable> handleClientError(ClientResponse response) {
