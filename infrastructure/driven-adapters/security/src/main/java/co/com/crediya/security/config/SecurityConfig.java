@@ -24,8 +24,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final LoanApplicationPath path;
-    
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, ReactiveJwtAuthenticationConverter jwtAuthConverter,
                                                          ReactiveJwtDecoder jwtDecoder) {
@@ -33,7 +31,6 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange((authorize) -> authorize
                         .pathMatchers( "/doc/**",  "/v3/api-docs/**").permitAll()
-                        .pathMatchers(path.getLoanApp() + "/**").hasAnyAuthority("USER")
                         .anyExchange().authenticated()
                 )
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
