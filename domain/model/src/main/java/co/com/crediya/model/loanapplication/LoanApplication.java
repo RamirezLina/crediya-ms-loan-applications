@@ -22,8 +22,8 @@ public class LoanApplication {
     private LocalDate deadline;
     private Long statusId;
     private Long loanTypeId;
-    
-    
+    private LocalDate creationDate;
+       
     
     public Mono<LoanApplication> validateAmount() {
         if (this.amount <= 0) {

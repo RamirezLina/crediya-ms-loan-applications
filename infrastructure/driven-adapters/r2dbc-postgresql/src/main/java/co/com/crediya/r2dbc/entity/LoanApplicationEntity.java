@@ -21,11 +21,13 @@ public class LoanApplicationEntity {
     @Column("email")
     private String email;
     @Column("monto")
-    private double amount;
+    private Double amount;
     @Column("plazo")
     private LocalDate deadline;
     @Column("id_estado")
     private Long statusId;
     @Column("id_tipo_prestamo")
     private Long loanTypeId;
+    @Column("fecha_creacion")
+    private LocalDate creationDate;
 }

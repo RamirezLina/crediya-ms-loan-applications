@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -20,6 +21,7 @@ public class RouterRest implements OpenApiControllerDoc {
     
     @Bean
     public RouterFunction<ServerResponse> routerFunction(LoanApplicationHandler loanApplicationHandler) {
-        return route(POST( loanApplicationPath.getLoanApp()), loanApplicationHandler::listenRegisterLoanApplication);
+        return route(POST( loanApplicationPath.getLoanApp()), loanApplicationHandler::listenRegisterLoanApplication)
+                .andRoute(GET(loanApplicationPath.getLoanApp()), loanApplicationHandler::listenGetApplicationsToReview);
     }
 }

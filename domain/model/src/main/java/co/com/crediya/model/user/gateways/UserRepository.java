@@ -1,8 +1,11 @@
 package co.com.crediya.model.user.gateways;
 
+import co.com.crediya.model.user.User;
 import reactor.core.publisher.Mono;
 
 public interface UserRepository {
 
     Mono<Boolean> existUserByEmail(String email, String token);
+
+    Mono<User> getUserByEmail(String email, String token);
 }

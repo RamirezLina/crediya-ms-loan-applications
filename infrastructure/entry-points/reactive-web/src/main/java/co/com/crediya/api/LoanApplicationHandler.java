@@ -2,7 +2,8 @@ package co.com.crediya.api;
 
 import co.com.crediya.api.dto.LoanApplicationDto;
 import co.com.crediya.api.mapper.LoanApplicationDtoMapper;
-import co.com.crediya.model.error.AuthException;
+import co.com.crediya.api.security.UserAccessControl;
+import co.com.crediya.usecase.registerapplication.GetApplicationsByPageUseCase;
 import co.com.crediya.usecase.registerapplication.RegisterApplicationUseCase;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -11,15 +12,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import java.util.Set;
-
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 @Component
 @RequiredArgsConstructor
@@ -27,22 +28,41 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 public class LoanApplicationHandler {
 
     private final RegisterApplicationUseCase registerApplicationUseCase;
+    private final GetApplicationsByPageUseCase getApplicationsByPageUseCase;
     private final LoanApplicationDtoMapper mapper;
     private final Validator validator;
+    private final UserAccessControl userAccessControl;
 
 
+    @PreAuthorize("hasAuthority('USER')")
     public Mono<ServerResponse> listenRegisterLoanApplication(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(LoanApplicationDto.class)
                 .switchIfEmpty(Mono.error(new ServerWebInputException("El cuerpo de la solicitud es requerido")))
                 .flatMap(this::validateDto)
                 .doOnNext(dto -> log.info("[REGISTER LOAN APPLICATION] Se inicia el registro de la solicitud de prestamo"))
-                .flatMap(dto -> validateUserRequest(dto, serverRequest))
+                .flatMap(dto -> userAccessControl.validateResourceOwnership(dto, serverRequest))
                 .map(mapper::toModel)
                 .flatMap(model -> registerApplicationUseCase.execute(model, getToken(serverRequest)))
                 .map(mapper::toDto)
                 .flatMap(applicationDto -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(applicationDto))
+                .doOnError(this::logError);
+    }
+
+    @PreAuthorize("hasAuthority('ASESOR')")
+    public Mono<ServerResponse> listenGetApplicationsToReview(ServerRequest serverRequest) {
+        return Mono.just(serverRequest.queryParam("page"))
+                .zipWith(Mono.just(serverRequest.queryParam("size")))
+                .doOnNext(t -> log.info("[GET APPLICATIONS TO REVIEW] Se inica la busqueda de solicitudes por revisar: Pag {}, Registros/pag: {}",t.getT1() , t.getT2()))
+                .flatMap(tuple -> getApplicationsByPageUseCase.getLoanApplicationsByPage(
+                        getIntFromOptional(tuple.getT1(), "page"),
+                        getIntFromOptional(tuple.getT2(), "size"),
+                        getToken(serverRequest)
+                ))
+                .flatMap(page -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(page))
                 .doOnError(this::logError);
     }
 
@@ -58,34 +78,17 @@ public class LoanApplicationHandler {
         return Mono.just(dto);
     }
 
-    private Mono<String> getTokenEmail(ServerRequest serverRequest) {
-        return serverRequest.principal()
-                .switchIfEmpty(Mono.error(AuthException.Type.TOKEN_NOT_FOUND
-                        .build("No se pudo obtener el principal de seguridad")))
-                .mapNotNull(principal -> {
-                    if (principal instanceof JwtAuthenticationToken jwtAuth) {
-                        Object subClaim = jwtAuth.getToken().getClaims().get("sub");
-                        return subClaim != null ? subClaim.toString() : null;
-                    }
-                    return null;
-                })
-                .switchIfEmpty(Mono.error(AuthException.Type.TOKEN_NOT_FOUND
-                        .build("No se pudo obtener el principal de seguridad")));
+    private int getIntFromOptional(Optional<String> optional, String paramName) {
+        return optional.map(value -> {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                throw new ServerWebInputException("El parámetro '" + paramName + "' debe ser un número entero válido.");
+            }
+        }).orElseThrow(() -> new ServerWebInputException("El parámetro '" + paramName + "' es requerido."));
     }
 
-    private Mono<LoanApplicationDto> validateUserRequest(LoanApplicationDto dto, ServerRequest serverRequest) {
-        return getTokenEmail(serverRequest)
-                .zipWith(Mono.just(dto.email()))
-                .flatMap(tuple -> {
-                    String emailFromToken = tuple.getT1();
-                    String emailFromBody = tuple.getT2();
-                    if (!emailFromToken.equals(emailFromBody)) {
-                        return Mono.error(AuthException.Type.USER_ACCESS_DENIED.build());
-                    }
-                    return Mono.just(dto);
-                });
-    }
-    
+
     private void logError(Throwable exception) {
         log.error("Error Message: {} \n Stack trace: {}", exception.getMessage(), exception.getStackTrace());
     }

@@ -7,6 +7,12 @@ spring:
     add-properties: false
   profiles:
     include: null
+  r2dbc:
+    url: r2dbc:postgresql://${R2DBC_HOST}:${R2DBC_PORT}/${R2DBC_DATABASE}
+    username: ${R2DBC_USERNAME}
+    password: ${R2DBC_PASSWORD}
+    properties:
+      schema: ${R2DBC_SCHEMA}
 management:
   endpoints:
     web:
@@ -19,6 +25,7 @@ management:
   health:
     circuitbreakers:
       enabled: true
+      
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
 adapters:
