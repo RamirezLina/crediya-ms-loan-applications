@@ -15,7 +15,6 @@ class UserTest {
         User user = User.builder()
                 .name("Ana")
                 .lastName("García")
-                .identification(12345678L)
                 .birthDate(birth)
                 .address("Calle 123")
                 .phone(3001234567L)
@@ -26,7 +25,6 @@ class UserTest {
 
         assertEquals("Ana", user.getName());
         assertEquals("García", user.getLastName());
-        assertEquals(12345678L, user.getIdentification());
         assertEquals(birth, user.getBirthDate());
         assertEquals("Calle 123", user.getAddress());
         assertEquals(3001234567L, user.getPhone());
@@ -40,7 +38,6 @@ class UserTest {
         User base = User.builder()
                 .name("Juan")
                 .lastName("Pérez")
-                .identification(98765432L)
                 .birthDate(LocalDate.of(1985, 1, 15))
                 .address("Av. Siempre Viva 742")
                 .phone(3115557788L)
@@ -56,7 +53,6 @@ class UserTest {
 
         assertEquals("Juan", modified.getName());
         assertEquals("Pérez", modified.getLastName());
-        assertEquals(98765432L, modified.getIdentification());
         assertEquals(LocalDate.of(1985, 1, 15), modified.getBirthDate());
         assertEquals("Av. Central 100", modified.getAddress());
         assertEquals(3115557788L, modified.getPhone());
