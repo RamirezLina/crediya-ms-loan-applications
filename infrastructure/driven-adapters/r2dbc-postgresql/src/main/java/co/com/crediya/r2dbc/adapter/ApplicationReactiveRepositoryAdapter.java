@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.relational.core.sql.SubselectExpression;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -57,6 +59,13 @@ public class ApplicationReactiveRepositoryAdapter extends ReactiveAdapterOperati
                 .zipWith(repository.countAllByStatusNot(status))
                 .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()))
                 .map(pageApplicationMapper::toModel)
+                .doOnError(this::logError);
+    }
+
+    @Override
+    public Mono<LoanApplication> getById(Long applicationId) {
+        return super.findById(applicationId)
+                .filter(Objects::nonNull)
                 .doOnError(this::logError);
     }
 

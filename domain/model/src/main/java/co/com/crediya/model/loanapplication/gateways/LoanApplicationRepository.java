@@ -9,4 +9,6 @@ public interface LoanApplicationRepository {
     Mono<LoanApplication> save(LoanApplication application);
 
     Mono<LoanApplicationPage> getByPage(int page, int size, Long status);
+
+    Mono<LoanApplication> getById(Long  applicationId);
 }
