@@ -4,7 +4,12 @@ public class BusinessException extends RuntimeException {
 
     public enum Type{
         LOAN_TYPE_NOT_EXISTS("El tipo de prestamo solicitado  (id:%s) no existe"),
+        LOAN_NOT_EXISTS("El prestamo a actualizar  (id:%s) no existe"),
         USER_NOT_EXISTS("El usuario con el email indicado no existe"),
+        STATUS_TO_UPDATE_NOT_VALID("El estado %s , no es un estado válido para actualizar una solicitud"),
+        STATUS_ALREADY_DEFINED("La solicitud a actualizar ya se encuentra en estado %s"),
+        SQS_FAILED("El estado de la solicitud se ha actualizado pero no fue posible enviar el correo electronico. Error: %s"),
+
         INVALID_AMOUNT(BusinessValidations.INVALID_AMOUNT_VALUE),
         INVALID_DEADLINE(BusinessValidations.INVALID_DEADLINE_VALUE);
         
