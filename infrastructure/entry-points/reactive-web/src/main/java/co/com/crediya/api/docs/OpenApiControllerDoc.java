@@ -2,6 +2,7 @@ package co.com.crediya.api.docs;
 
 import co.com.crediya.api.LoanApplicationHandler;
 import co.com.crediya.api.dto.LoanApplicationDto;
+import co.com.crediya.api.dto.UpdateApplicationDto;
 import co.com.crediya.api.error.ErrorPayload;
 import co.com.crediya.model.loanapplication.LoanApplicationPage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springdoc.core.annotations.RouterOperation;
 import org.springdoc.core.annotations.RouterOperations;
 import org.springframework.http.MediaType;
@@ -28,6 +30,7 @@ public interface OpenApiControllerDoc {
                     operation = @Operation(operationId = "RegisterLoanApplication",
                             summary = "Registrar una nueva solicitud de prestamo",
                             tags = {"API Solicitudes"},
+                            security = { @SecurityRequirement(name = "bearerAuth") },
                             requestBody = @RequestBody(
                                     required = true,
                                     description = "Datos de la solicitud de prestamo",
@@ -51,11 +54,36 @@ public interface OpenApiControllerDoc {
                     operation = @Operation(operationId = "GetApplicationsByPage",
                             summary = "Obtener las solicitudes de prestamo pendientes de revision de forma paginada",
                             tags = {"API Solicitudes"},
+                            security = { @SecurityRequirement(name = "bearerAuth") },
                             parameters = {@Parameter(name = "page", description = "Pagina de datos a obtener", required = true, in = ParameterIn.QUERY),
                                     @Parameter(name = "size", description = "Numero de elementos por pagina", required = true, in = ParameterIn.QUERY)},
                             responses = {@ApiResponse(responseCode = "200", description = "Solicitud de prestamo registrada.",
                                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoanApplicationPage.class))),
-                                    @ApiResponse(responseCode = "400", description = "Error de validación",
+                                    @ApiResponse(responseCode = "400", description = "Error de validacion",
+                                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorPayload.class))),
+                                    @ApiResponse(responseCode = "401", description = "No autenticado",
+                                            content = @Content(mediaType = "application/json")),
+                                    @ApiResponse(responseCode = "403", description = "Acceso prohibido: el usuario no esta autorizado",
+                                            content = @Content(mediaType = "application/json"))})
+            ),
+            @RouterOperation(path = "/api/v1/solicitud",
+                    produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = {MediaType.APPLICATION_JSON_VALUE},
+                    method = RequestMethod.PUT, beanClass = LoanApplicationHandler.class, beanMethod = "listenUpdateLoanApplication",
+                    operation = @Operation(operationId = "UpdateApplicationStatus",
+                            summary = "Aprobar o rechazar una solicitud de prestamo",
+                            tags = {"API Solicitudes"},
+                            security = { @SecurityRequirement(name = "bearerAuth") },
+                            requestBody = @RequestBody(
+                                    required = true,
+                                    description = "Id de la solicitud a actualizar y nuevo estado",
+                                    content = @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(implementation = UpdateApplicationDto.class)
+                                    )
+                            ),
+                            responses = {@ApiResponse(responseCode = "200", description = "Solicitud de prestamo actualizada.",
+                                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoanApplicationDto.class))),
+                                    @ApiResponse(responseCode = "400", description = "Error de validacion",
                                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorPayload.class))),
                                     @ApiResponse(responseCode = "401", description = "No autenticado",
                                             content = @Content(mediaType = "application/json")),

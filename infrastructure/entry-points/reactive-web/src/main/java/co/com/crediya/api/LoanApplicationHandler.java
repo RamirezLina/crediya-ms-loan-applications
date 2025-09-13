@@ -1,10 +1,12 @@
 package co.com.crediya.api;
 
 import co.com.crediya.api.dto.LoanApplicationDto;
+import co.com.crediya.api.dto.UpdateApplicationDto;
 import co.com.crediya.api.mapper.LoanApplicationDtoMapper;
 import co.com.crediya.api.security.UserAccessControl;
 import co.com.crediya.usecase.registerapplication.GetApplicationsByPageUseCase;
 import co.com.crediya.usecase.registerapplication.RegisterApplicationUseCase;
+import co.com.crediya.usecase.registerapplication.UpdateApplicationStatusUseCase;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
@@ -29,6 +31,8 @@ public class LoanApplicationHandler {
 
     private final RegisterApplicationUseCase registerApplicationUseCase;
     private final GetApplicationsByPageUseCase getApplicationsByPageUseCase;
+    private final UpdateApplicationStatusUseCase updateApplicationStatusUseCase;
+
     private final LoanApplicationDtoMapper mapper;
     private final Validator validator;
     private final UserAccessControl userAccessControl;
@@ -54,7 +58,7 @@ public class LoanApplicationHandler {
     public Mono<ServerResponse> listenGetApplicationsToReview(ServerRequest serverRequest) {
         return Mono.just(serverRequest.queryParam("page"))
                 .zipWith(Mono.just(serverRequest.queryParam("size")))
-                .doOnNext(t -> log.info("[GET APPLICATIONS TO REVIEW] Se inica la busqueda de solicitudes por revisar: Pag {}, Registros/pag: {}",t.getT1() , t.getT2()))
+                .doOnNext(t -> log.info("[GET APPLICATIONS TO REVIEW] Se inica la busqueda de solicitudes por revisar: Pag {}, Registros/pag: {}", t.getT1(), t.getT2()))
                 .flatMap(tuple -> getApplicationsByPageUseCase.getLoanApplicationsByPage(
                         getIntFromOptional(tuple.getT1(), "page"),
                         getIntFromOptional(tuple.getT2(), "size"),
@@ -66,12 +70,35 @@ public class LoanApplicationHandler {
                 .doOnError(this::logError);
     }
 
+    @PreAuthorize("hasAuthority('ASESOR')")
+    public Mono<ServerResponse> listenUpdateLoanApplication(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(UpdateApplicationDto.class)
+                .switchIfEmpty(Mono.error(new ServerWebInputException("El cuerpo de la solicitud es requerido")))
+                .flatMap(this::validateDto)
+                .doOnNext(dto -> log.info("[UPDATE LOAN APPLICATION] Se inicia el la actualizacion a status {}", dto.newStatus()))
+                .flatMap(dto -> updateApplicationStatusUseCase.execute(
+                        dto.applicationId(), dto.newStatus()))
+                .map(mapper::toDto)
+                .flatMap(applicationDto -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(applicationDto))
+                .doOnError(this::logError);
+    }
+
     private String getToken(ServerRequest serverRequest) {
         return serverRequest.headers().firstHeader(HttpHeaders.AUTHORIZATION);
     }
 
     private Mono<LoanApplicationDto> validateDto(LoanApplicationDto dto) {
         Set<ConstraintViolation<LoanApplicationDto>> violations = validator.validate(dto);
+        if (!violations.isEmpty()) {
+            return Mono.error(new ConstraintViolationException(violations));
+        }
+        return Mono.just(dto);
+    }
+
+    private Mono<UpdateApplicationDto> validateDto(UpdateApplicationDto dto) {
+        Set<ConstraintViolation<UpdateApplicationDto>> violations = validator.validate(dto);
         if (!violations.isEmpty()) {
             return Mono.error(new ConstraintViolationException(violations));
         }
