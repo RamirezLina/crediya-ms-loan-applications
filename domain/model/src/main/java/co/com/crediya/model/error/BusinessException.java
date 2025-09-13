@@ -8,7 +8,7 @@ public class BusinessException extends RuntimeException {
         USER_NOT_EXISTS("El usuario con el email indicado no existe"),
         STATUS_TO_UPDATE_NOT_VALID("El estado %s , no es un estado válido para actualizar una solicitud"),
         STATUS_ALREADY_DEFINED("La solicitud a actualizar ya se encuentra en estado %s"),
-        SQS_FAILED("El estado de la solicitud se ha actualizado pero no fue posible enviar el correo electronico. Error: %s"),
+        NOTIFICATION_SEND_FAILED("El estado de la solicitud se ha actualizado pero no fue posible enviar el correo electronico. Error: %s"),
 
         INVALID_AMOUNT(BusinessValidations.INVALID_AMOUNT_VALUE),
         INVALID_DEADLINE(BusinessValidations.INVALID_DEADLINE_VALUE);

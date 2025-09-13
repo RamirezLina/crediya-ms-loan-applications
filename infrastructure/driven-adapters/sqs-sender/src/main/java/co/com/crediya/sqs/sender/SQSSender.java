@@ -24,7 +24,7 @@ public class SQSSender implements QueueSenderGateway {
                 .doOnNext(response -> log.debug("Message sent {}", response.messageId()))
                 .map(SendMessageResponse::messageId)
                 .doOnError(this::logError)
-                .onErrorMap(ex-> BusinessException.Type.SQS_FAILED.build(ex.getMessage()));
+                .onErrorMap(ex-> BusinessException.Type.NOTIFICATION_SEND_FAILED.build(ex.getMessage()));
     }
 
     private SendMessageRequest buildRequest(String message) {
