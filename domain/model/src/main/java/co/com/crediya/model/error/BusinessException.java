@@ -7,8 +7,9 @@ public class BusinessException extends RuntimeException {
         LOAN_NOT_EXISTS("El prestamo a actualizar  (id:%s) no existe"),
         USER_NOT_EXISTS("El usuario con el email indicado no existe"),
         STATUS_TO_UPDATE_NOT_VALID("El estado %s , no es un estado válido para actualizar una solicitud"),
-        STATUS_ALREADY_DEFINED("La solicitud a actualizar ya se encuentra en estado %s"),
+        STATUS_ALREADY_DEFINED("La solicitud ya ha sido actualizada. Su estado no puede ser modificado"),
         NOTIFICATION_SEND_FAILED("El estado de la solicitud se ha actualizado pero no fue posible enviar el correo electronico. Error: %s"),
+        DEBT_CAPACITY_SEND_FAILED("La solicitud ha sido guardada pero no ha sido posible iniciar la validación automática. Error: %s"),
 
         INVALID_AMOUNT(BusinessValidations.INVALID_AMOUNT_VALUE),
         INVALID_DEADLINE(BusinessValidations.INVALID_DEADLINE_VALUE);

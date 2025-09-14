@@ -73,7 +73,8 @@ springdoc:
 app:
   openapi:
     title: "CREDIYA: ms-loan-applications"
-    description: "Api para la gestion de solicitudes de préstamo de la plataforma CrediYa"
+    description: "Api para la gestion de solicitudes de préstamo de la plataforma\
+      \ CrediYa"
     version: "1.0.0"
     server: "http://localhost:8081"
 jwt:
@@ -82,4 +83,13 @@ jwt:
 adapter:
   sqs:
     region: "${SQS_REGION}"
-    queueUrl: "${SQS_QUEUE_URL}"
+    queueNotificationsUrl: "${SQS_QUEUE_NOTIFICATION_URL}"
+    queueDebtCapacityUrl: "${SQS_QUEUE_CAPACITY_URL}"
+entrypoint:
+  sqs:
+    region:  "${SQS_REGION}"
+    queueUpdateApplicationUrl: "${SQS_QUEUE_UPDATE_URL}"
+    waitTimeSeconds: 20
+    maxNumberOfMessages: 10
+    visibilityTimeoutSeconds: 10
+    numberOfThreads: 1

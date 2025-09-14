@@ -18,18 +18,34 @@ public class SQSSender implements QueueSenderGateway {
     private final SQSSenderProperties properties;
     private final SqsAsyncClient client;
 
-    public Mono<String> send(String message) {
-        return Mono.fromCallable(() -> buildRequest(message))
-                .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
-                .doOnNext(response -> log.debug("Message sent {}", response.messageId()))
-                .map(SendMessageResponse::messageId)
-                .doOnError(this::logError)
+
+    public Mono<String> sendToNotification(String message) {
+        return Mono.fromCallable(properties::queueNotificationsUrl)
+                .flatMap(url-> send(message, url))
                 .onErrorMap(ex-> BusinessException.Type.NOTIFICATION_SEND_FAILED.build(ex.getMessage()));
+    
     }
 
-    private SendMessageRequest buildRequest(String message) {
+    public Mono<String> sendToCapacity(String message) {
+        return Mono.fromCallable(properties::queueDebtCapacityUrl)
+                .flatMap(url-> send(message, url))
+                .onErrorMap(ex-> BusinessException.Type.DEBT_CAPACITY_SEND_FAILED.build(ex.getMessage()));
+
+    }
+    
+    private Mono<String> send(String message, String queueUrl) {
+        return Mono.fromCallable(() -> buildRequest(message, queueUrl))
+                .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
+                .doOnNext(response -> log.info("Message sent {}", message)) //TODO borrar
+                .doOnNext(response -> log.debug("Message sent {}", response.messageId()))
+                .map(SendMessageResponse::messageId)
+                .doOnError(this::logError);
+              
+    }
+
+    private SendMessageRequest buildRequest(String message, String queueUrl) {
         return SendMessageRequest.builder()
-                .queueUrl(properties.queueUrl())
+                .queueUrl(queueUrl)
                 .messageBody(message)
                 .build();
     }
