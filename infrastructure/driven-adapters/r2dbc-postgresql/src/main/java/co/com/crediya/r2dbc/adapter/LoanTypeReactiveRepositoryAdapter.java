@@ -28,7 +28,7 @@ public class LoanTypeReactiveRepositoryAdapter extends ReactiveAdapterOperations
 
     @Override
     public Mono<LoanType> findById(Long id) {
-        log.info("[CREATE LOAN APPLICATION] Buscando el tipo de prestamo por id");
+        log.info(" Buscando el tipo de prestamo por id");
         return super.findById(id)
                 .doOnError(super::logError);
 

@@ -27,11 +27,11 @@ public class UpdateApplicationStatusUseCase {
                 .map(application -> application.toBuilder().statusId(newStatus.getStatusId()).build())
                 .flatMap(repository::save)
                 .flatMap(saved -> queueSenderGateway
-                        .send(serializer.toJson(saved))
+                        .sendToNotification(serializer.toJson(saved))
                         .thenReturn(saved)
                 );
     }
-    
+
     private Mono<LoanApplication> validateCurrentStatusApplication(LoanApplication application) {
 
         if (application.getStatusId().equals(LoanStatus.APPROVED.getStatusId())) {
@@ -45,7 +45,7 @@ public class UpdateApplicationStatusUseCase {
     }
 
     private Mono<LoanStatus> validateNewStatus(LoanStatus newStatus) {
-        if (newStatus.equals(LoanStatus.PENDING) || newStatus.equals(LoanStatus.MANUAL)) {
+        if (newStatus.equals(LoanStatus.AUTOMATIC) || newStatus.equals(LoanStatus.MANUAL)) {
             return Mono.error(BusinessException.Type.STATUS_TO_UPDATE_NOT_VALID.build(newStatus.name()));
         }
         return Mono.just(newStatus);

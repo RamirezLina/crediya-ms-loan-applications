@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class PageApplicationMapper {
+public class ApplicationMapper {
 
     public LoanApplicationPage toModel(Page<PageableApplicationEntity> page){
         List<LoanApplicationForPage> content = page.getContent().stream()
-            .map(this::getLoanApplicationForPage)
+            .map(this::toModel)
             .toList();
         return LoanApplicationPage.builder()
             .content(content)
@@ -24,8 +24,8 @@ public class PageApplicationMapper {
             .totalPages(page.getTotalPages())
             .build();
     }
-
-    private LoanApplicationForPage getLoanApplicationForPage(PageableApplicationEntity entity) {
+    
+    public LoanApplicationForPage toModel(PageableApplicationEntity entity) {
         return LoanApplicationForPage.builder()
                 .id(entity.id())
                 .email(entity.email())

@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 public class RestClientAuth implements UserRepository {
     private final WebClient client;
 
-    @CircuitBreaker(name = "existUserByEmail", fallbackMethod = "fallbackExistUserByEmail")
+    @CircuitBreaker(name = "existUserByEmail")
     public Mono<Boolean> existUserByEmail(String email, String token) {
         log.info("[CREATE LOAN APPLICATION]  Validando la existencia de un usuario con este email");
         return client
@@ -39,7 +39,7 @@ public class RestClientAuth implements UserRepository {
     }
 
     public  Mono<User> getUserByEmail(String email, String token) {
-        log.info("[GET PAGEABLE LOAN APPLICATIONS]  Obteniendo la informacion del usuario en ms-auth");
+        log.info("Obteniendo la informacion del usuario en ms-auth");
         return client
                 .get()
                 .uri(uriBuilder -> uriBuilder.path("/detail/{email}").build(email))
@@ -65,8 +65,5 @@ public class RestClientAuth implements UserRepository {
     private Mono<Throwable> handleServerError(ClientResponse response) {
         return response.bodyToMono(String.class)
                 .map(AppException.Type.MS_REQUEST_500_ERROR::build);
-    }
-    private Mono<Boolean> fallbackExistUserByEmail(String email, String token) {
-        return Mono.just(false);
     }
 }

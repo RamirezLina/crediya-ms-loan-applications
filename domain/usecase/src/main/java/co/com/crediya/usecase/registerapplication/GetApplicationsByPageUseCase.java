@@ -34,7 +34,7 @@ public class GetApplicationsByPageUseCase {
         return Flux.fromIterable(page.getContent())
                 .flatMap(item -> getUserData(item, token, lastUserRef))
                 .map(appPage -> appPage.toBuilder()
-                        .monthlyAmount(calculateMonthlyAmount(appPage))
+                        .monthlyAmount(appPage.calculateMonthlyAmount())
                         .build())
                 .collectList()
                 .map(list -> page.toBuilder().content(list).build());
@@ -58,16 +58,6 @@ public class GetApplicationsByPageUseCase {
                 .build();
     }
 
-    private double calculateMonthlyAmount(LoanApplicationForPage application) {
-        double monthlyRate = application.getInterestRate() / 12;
-        Period period = Period.between(application.getCreationDate(), application.getDeadline());
-        int months = period.getYears() * 12 + period.getMonths();
-        Double p = application.getTotalAmount();
-
-        return Math.round(
-                p * (monthlyRate * Math.pow(1 + monthlyRate, months)) /
-                        (Math.pow(1 + monthlyRate, months) - 1) * 100.0
-        ) / 100.0;
-    }
+   
 
 }
