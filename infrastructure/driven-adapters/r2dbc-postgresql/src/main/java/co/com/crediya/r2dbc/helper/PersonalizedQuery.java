@@ -28,6 +28,23 @@ public class PersonalizedQuery {
         WHERE e.id_estado != :status
     """;
 
+    public static final String APPROVED_APPLICATION_BY_USER = """
+     SELECT
+                     s.id_solicitud AS id,
+                     s.email AS email,
+                     s.monto AS amount,
+                     s.plazo AS deadline,
+                     s.fecha_creacion AS creationdate,
+                     t.nombre AS loantype,
+                     t.tasa_interes AS rate,
+                     e.descripcion AS loanstatus
+                 FROM solicitud s
+                 JOIN tipo_prestamo t ON t.id_tipo_prestamo = s.id_tipo_prestamo
+                 JOIN estados e ON e.id_estado = s.id_estado
+                 WHERE s.email = :email
+                   AND e.id_estado = :status
+        
+""";
     private PersonalizedQuery() {
     }
 }
