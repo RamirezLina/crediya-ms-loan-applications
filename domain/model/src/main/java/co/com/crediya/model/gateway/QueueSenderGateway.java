@@ -4,5 +4,6 @@ import reactor.core.publisher.Mono;
 
 public interface QueueSenderGateway {
 
-    Mono<String> send(String message);
+    Mono<String> sendToNotification(String message);
+     Mono<String> sendToCapacity(String message);
 }
