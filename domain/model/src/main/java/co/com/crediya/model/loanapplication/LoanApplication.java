@@ -1,5 +1,7 @@
 package co.com.crediya.model.loanapplication;
+
 import co.com.crediya.model.error.BusinessException;
+import co.com.crediya.model.loantype.LoanType;
 import lombok.Builder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,8 +25,8 @@ public class LoanApplication {
     private Long statusId;
     private Long loanTypeId;
     private LocalDate creationDate;
-       
-    
+
+
     public Mono<LoanApplication> validateAmount() {
         if (this.amount <= 0) {
             return Mono.error(BusinessException.Type.INVALID_AMOUNT.build());
@@ -33,16 +35,18 @@ public class LoanApplication {
     }
 
     public Mono<LoanApplication> validateDeadline() {
-        if ( !this.deadline.isAfter(LocalDate.now())) {
+        if (!this.deadline.isAfter(LocalDate.now())) {
             return Mono.error(BusinessException.Type.INVALID_DEADLINE.build());
         }
         return Mono.just(this);
     }
 
-    public LoanApplication defineApplicationStatus(){
-        this.setStatusId(LoanStatus.PENDING.getStatusId());
+    public LoanApplication defineApplicationStatus(LoanType type) {
+        this.setStatusId(type.isAutomaticValidation()
+                ? LoanStatus.AUTOMATIC.getStatusId()
+                : LoanStatus.MANUAL.getStatusId());
         return this;
     }
-    
-    
+
+
 }
